@@ -12,8 +12,11 @@ contract UstxToken  is MintableToken,BurnableToken {
 
     string public constant tokenName = "USTX";//token name
     string public constant tokenSymbol = "USTX";//token symbol
-    uint256 public initialSupply = 2*10**9;// initial total amount
-    uint8 public constant tokenDecimals = 8;
+    //uint256 public initialSupply = 2*10**9;// initial total amount
+    //uint8 public constant tokenDecimals = 8;
+
+    uint256 public initialSupply = 3000;// initial total amount
+    uint8 public constant tokenDecimals = 0;
     bool public halted = false;//When an emergency occurs, the creator can call the halt function, stop all operations on the funds
 
     uint256 public exchangeRate;//Exchange rate
@@ -33,6 +36,7 @@ contract UstxToken  is MintableToken,BurnableToken {
     function UstxToken() ERC20Token(initialSupply, tokenName, tokenSymbol,tokenDecimals) public {
         balanceOf[msg.sender] = totalSupply;
         owner = msg.sender;
+        stabled[msg.sender] = 1;
         allTokenAddr.push(msg.sender);
     }
 
