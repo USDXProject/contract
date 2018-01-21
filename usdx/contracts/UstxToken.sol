@@ -85,31 +85,30 @@ contract UstxToken  is MintableToken,BurnableToken {
     *shareToken to  stableToken
     */
     function stableCoins() onlyOwner public {
-        uint256 burnTotalToken;
         for(uint256 i=0; i< allTokenAddr.length; i++){
 
             address addr = allTokenAddr[i];//
             uint256 balance = balanceOf[addr];
-            if(balance >0 && stabled[addr] == 1){//用户账户余额大于零 且 还未成为稳定币
 
+            // Proceed if and only if the user's balance is positive and the
+            // coins haven't been stalized yet.
+            if (balance > 0 && stabled[addr] == 1) {
                 stabled[addr] = 2;
                 uint256 oldBalance = balance;
 
-                if(exchangeRate <100){//多余的代币
-                    burnTotalToken += (oldBalance - balanceOf[addr]);
-                    balanceOf[addr] = balance * exchangeRate /100;
-                    StableCoins(addr,1,(oldBalance - balanceOf[addr]));
-                }else if(exchangeRate >100){//挖矿 增加代币
-                    uint256 _amount = (balance * exchangeRate /100) - oldBalance;
+                if (exchangeRate < 100) {
+                    // Calculate the number of excess coins to burn.
+                    uint256 newBalance = balance * exchangeRate / 100;
+                    burn(addr, balance - newBalance);
+                    StableCoins(addr, 1, balanceOf[addr]);
+                } else if(exchangeRate > 100) {
+                    // Calculate the number of new coins to mint.
+                    uint256 _amount = (balance * exchangeRate / 100) - oldBalance;
                     mint(addr, _amount);
-                    StableCoins(addr,2,_amount);
+                    StableCoins(addr, 2, _amount);
                 }
 
              }
-         }
-         //Destroy the excess token
-         if(burnTotalToken >0){
-             burn(burnTotalToken);
          }
       }
 
