@@ -17,6 +17,12 @@ contract UstxToken  is MintableToken,BurnableToken {
     // destroyed, corresponding to the Contraction policy.
     enum MonetaryPolicy { Expansion, Contraction }
 
+    // Enum that indicates the status of coins. Share means the coins have
+    // not been pegged. After the initial pegging, coins status will turn to
+    // Stable. This process is irreversible. Initial is the state when the
+    // account is first activated with no coin balance.
+    enum CoinStatus { Initial, Share, Stable }
+
     string public constant tokenName = "USTX";//token name
     string public constant tokenSymbol = "USTX";//token symbol
     //uint256 public initialSupply = 2*10**9;// initial total amount
@@ -28,7 +34,7 @@ contract UstxToken  is MintableToken,BurnableToken {
 
     uint256 public exchangeRate;//Exchange rate
     mapping (address => bool) public frozenAccount;//Whether or not to freeze a list of accounts
-    mapping (address => uint8) stabled;//share token turn into  stable coin
+    mapping (address => CoinStatus) public coinStatus;
     address[] public allTokenAddr;//All have a balance of the token address
 
     event FrozenFunds(address indexed target, bool frozen);
@@ -44,7 +50,7 @@ contract UstxToken  is MintableToken,BurnableToken {
     function UstxToken() ERC20Token(initialSupply, tokenName, tokenSymbol,tokenDecimals) public {
         balanceOf[msg.sender] = totalSupply;
         owner = msg.sender;
-        stabled[msg.sender] = 1;
+        coinStatus[msg.sender] = CoinStatus.Share;
         allTokenAddr.push(msg.sender);
     }
 
@@ -61,18 +67,21 @@ contract UstxToken  is MintableToken,BurnableToken {
     }
 
     function transfer(address _to, uint256 _value) accountFreezed(msg.sender) unhaltedOperation public returns (bool) {
-        if(balanceOf[_to] == 0 && stabled[_to] != 1){
-            stabled[_to] = 1;
+        // If the _to address is in Initial status and has no balance, then add
+        // it to the list of addresses.
+        if (balanceOf[_to] == 0 && coinStatus[_to] == CoinStatus.Initial){
+            coinStatus[_to] = CoinStatus.Share;
             allTokenAddr.push(_to);
         }
         super.transfer(_to,_value);
     }
+
    /**
     * Freeze accounts and thaw accounts
     *  @param target address account address
     *  @param freeze bool Whether it is frozen
     *
-   */
+    */
     function freezeAccount(address target,bool freeze) onlyOwner public {
         frozenAccount[target] = freeze;
         FrozenFunds(target, freeze);
@@ -95,13 +104,13 @@ contract UstxToken  is MintableToken,BurnableToken {
     function stableCoins() onlyOwner public {
         for(uint256 i=0; i< allTokenAddr.length; i++){
 
-            address addr = allTokenAddr[i];//
+            address addr = allTokenAddr[i];
             uint256 balance = balanceOf[addr];
 
             // Proceed if and only if the user's balance is positive and the
             // coins haven't been stalized yet.
-            if (balance > 0 && stabled[addr] == 1) {
-                stabled[addr] = 2;
+            if (balance > 0 && coinStatus[addr] == CoinStatus.Share) {
+                coinStatus[addr] = CoinStatus.Stable;
                 uint256 oldBalance = balance;
 
                 if (exchangeRate < 100) {
