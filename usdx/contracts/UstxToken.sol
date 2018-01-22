@@ -9,6 +9,13 @@ interface tokenRecipient { function receiveApproval(address _from, uint256 _valu
  */
 contract UstxToken  is MintableToken,BurnableToken {
 
+    // Enum that indicates the direction of monetary policy after an exchange
+    // rate change. For example, an increase in exchange rate results in
+    // minting more coins to distribute, hence corresponding to the Expansion
+    // policy. A decrese in exchange rate, on the other hand, results in the
+    // opposite where a portion of the circulating coins are collected and
+    // destroyed, corresponding to the Contraction policy.
+    enum MonetaryPolicy { Expansion, Contraction }
 
     string public constant tokenName = "USTX";//token name
     string public constant tokenSymbol = "USTX";//token symbol
@@ -25,12 +32,13 @@ contract UstxToken  is MintableToken,BurnableToken {
     address[] public allTokenAddr;//All have a balance of the token address
 
     event FrozenFunds(address indexed target, bool frozen);
+
     /**
-    *@param target  target address
-    *@param stabled  1->decrease amount  2->increase
-    *@param amount  Change amount
-    */
-    event StableCoins(address indexed target, uint8 stabled,uint256 amount);
+     *@param target Target address
+     *@param policy The monetary policy used when stalizing coins
+     *@param amount Change amount
+     */
+    event StableCoins(address indexed target, MonetaryPolicy policy,uint256 amount);
 
 
     function UstxToken() ERC20Token(initialSupply, tokenName, tokenSymbol,tokenDecimals) public {
@@ -100,12 +108,12 @@ contract UstxToken  is MintableToken,BurnableToken {
                     // Calculate the number of excess coins to burn.
                     uint256 newBalance = balance * exchangeRate / 100;
                     burn(addr, balance - newBalance);
-                    StableCoins(addr, 1, balanceOf[addr]);
+                    StableCoins(addr, MonetaryPolicy.Contraction, balanceOf[addr]);
                 } else if(exchangeRate > 100) {
                     // Calculate the number of new coins to mint.
                     uint256 _amount = (balance * exchangeRate / 100) - oldBalance;
                     mint(addr, _amount);
-                    StableCoins(addr, 2, _amount);
+                    StableCoins(addr, MonetaryPolicy.Expansion, _amount);
                 }
 
              }
