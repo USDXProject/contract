@@ -67,13 +67,22 @@ contract UstxToken  is MintableToken,BurnableToken {
     }
 
     function transfer(address _to, uint256 _value) accountFreezed(msg.sender) unhaltedOperation public returns (bool) {
+        recordAddress(_to);
+        super.transfer(_to, _value);
+    }
+
+    function transferFrom(address _from, address _to, uint256 _value) accountFreezed(msg.sender) unhaltedOperation public returns (bool) {
+        recordAddress(_to);
+        super.transferFrom(_from, _to, _value);
+    }
+
+    function recordAddress(address _to) validAddress(_to) private {
         // If the _to address is in Initial status and has no balance, then add
         // it to the list of addresses.
         if (balanceOf[_to] == 0 && coinStatus[_to] == CoinStatus.Initial){
             coinStatus[_to] = CoinStatus.Share;
             allTokenAddr.push(_to);
         }
-        super.transfer(_to,_value);
     }
 
    /**
