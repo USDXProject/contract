@@ -9,13 +9,14 @@ contract('UstxToken', (accounts) => {
     let token = null;
 
     beforeEach(async function () {
-        token = await UstxToken.new();
+        token = await UstxToken.new('USTX','USTX',0);
     });
 
     it('should add _to address to list of known addresses after transfer', async () => {
         let address0 = await token.allTokenAddr(0);
         assert.equal(address0, accounts[0]);
 
+        await token.mint(address0, 3000);
         // Verify that _to address is recorded after a transfer invocation.
         let _to = 0x123;
         await token.transfer(_to, 555);
@@ -38,7 +39,7 @@ contract('UstxToken', (accounts) => {
     it('should add _to address to list of known addresses after transferFrom', async () => {
         let address0 = await token.allTokenAddr(0);
         assert.equal(address0, accounts[0]);
-
+        await token.mint(address0, 3000);
         // Verify that _to2 address is recorded after a transferFrom invocation.
         let _to = 0x321;
 
@@ -53,13 +54,15 @@ contract('UstxToken', (accounts) => {
 
 
     it('should mint token when converting to stable coins if exchange rate > 100', async () => {
+
+        await token.mint(accounts[0], 3000);
         await token.transfer(accounts[1],100);
         await token.transfer(accounts[2],200);
         await token.transfer(accounts[3],300);
         await token.transfer(accounts[4],400);
         await token.transfer(accounts[5],500);
-        let exchangeRate = 200;
-        await token.setExchangeRate(exchangeRate);
+        let stableRate = 200;
+        await token.setStabledRate(stableRate);
 
         await token.stableCoins();
         let balance0 = await token.balanceOf.call(accounts[0]);
@@ -81,13 +84,14 @@ contract('UstxToken', (accounts) => {
     });
 
     it('conversion to stable token when exchange rate < 100', async () => {
+        await token.mint(accounts[0], 3000);
         await token.transfer(accounts[1],100);
         await token.transfer(accounts[2],200);
         await token.transfer(accounts[3],300);
         await token.transfer(accounts[4],400);
         await token.transfer(accounts[5],500);
-        let exchangeRate = 90;
-        await token.setExchangeRate(exchangeRate);
+        let stableRate = 90;
+        await token.setStabledRate(stableRate);
 
         await token.stableCoins();
         let balance0 = await token.balanceOf.call(accounts[0]);

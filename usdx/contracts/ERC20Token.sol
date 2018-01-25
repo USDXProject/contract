@@ -7,7 +7,7 @@ import './SafeMath.sol';
 contract ERC20Token is SafeMath {
 
     string public constant standard = '1.0';
-    uint8 public decimals = 0;
+    uint256 public decimals = 8;
     // you need change the following three values
     string public name;//token name
     string public symbol;//token symbol
@@ -21,30 +21,42 @@ contract ERC20Token is SafeMath {
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
-    function ERC20Token(uint256 initialSupply,string tokenName,string tokenSymbol,uint8 tokenDecimals) public {
+    function ERC20Token(string _name,string _symbol,uint256 _decimals)
+    public
+    {
         //Initial total amount
-        totalSupply = initialSupply * 10 ** uint256(decimals);
+        //totalSupply = initialSupply * 10 ** uint256(decimals);
         //Initialize the token to the Creator
-        balanceOf[msg.sender] = totalSupply;
-        name = tokenName;
-        symbol = tokenSymbol;
-        decimals = tokenDecimals;
+        //balanceOf[msg.sender] = totalSupply;
+        name = _name;
+        symbol = _symbol;
+        decimals = _decimals;
     }
 
     // validates an address - currently only checks that it isn't null
-    modifier validAddress(address _address) {
+    modifier validAddress(address _address)
+    {
         require(_address != 0x0);
         _;
     }
 
-    function transfer(address _to, uint256 _value) public validAddress(_to) returns (bool success) {
+    function transfer(address _to, uint256 _value)
+    public
+    validAddress(_to)
+    returns (bool success)
+    {
         balanceOf[msg.sender] = safeSub(balanceOf[msg.sender], _value);
         balanceOf[_to] = safeAdd(balanceOf[_to], _value);
         Transfer(msg.sender, _to, _value);
         return true;
     }
 
-    function transferFrom(address _from, address _to, uint256 _value) public validAddress(_from) validAddress(_to) returns (bool success) {
+    function transferFrom(address _from, address _to, uint256 _value)
+    public
+    validAddress(_from)
+    validAddress(_to)
+    returns (bool success)
+    {
         allowance[_from][msg.sender] = safeSub(allowance[_from][msg.sender], _value);
         balanceOf[_from] = safeSub(balanceOf[_from], _value);
         balanceOf[_to] = safeAdd(balanceOf[_to], _value);
@@ -52,7 +64,11 @@ contract ERC20Token is SafeMath {
         return true;
     }
 
-    function approve(address _spender, uint256 _value) public validAddress(_spender) returns (bool success) {
+    function approve(address _spender, uint256 _value)
+    public
+    validAddress(_spender)
+    returns (bool success)
+    {
         // To change the approve amount you first have to reduce the addresses`
         //  allowance to zero by calling `approve(_spender, 0)` if it is not
         //  already 0 to mitigate the race condition described here:
@@ -60,5 +76,18 @@ contract ERC20Token is SafeMath {
         allowance[msg.sender][_spender] = _value;
         Approval(msg.sender, _spender, _value);
         return true;
+    }
+    /**
+   * @dev Function to check the amount of tokens that an owner allowed to a spender.
+   * @param _owner address The address which owns the funds.
+   * @param _spender address The address which will spend the funds.
+   * @return A uint256 specifying the amount of tokens still available for the spender.
+   */
+   function allowance(address _owner, address _spender)
+    public
+    view
+    returns (uint256)
+    {
+        return allowance[_owner][_spender];
     }
 }

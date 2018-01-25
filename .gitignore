@@ -1,0 +1,23 @@
+.DS_Store
+build/
+/build/
+usdx/.idea/
+usdx/build/
+usdx/node_modules/
+node_modules/
+
+contract03/usdx/.idea/
+contract03/usdx/build/
+contract03/usdx/node_modules/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln

@@ -22,7 +22,9 @@ contract BurnableToken is ERC20Token, Ownable {
     * @param _from The address from which tokens will be burned.
     * @param _value The amount of tokens to be burned.
     */
-    function burn(address _from, uint256 _value) onlyOwner public {
+    function burn(address _from, uint256 _value)
+        onlyOwner public
+    {
         require(_value <= balanceOf[_from]);
         // no need to require value <= totalSupply, since that would imply the
         // sender's balance is greater than the totalSupply, which *should* be an assertion failure

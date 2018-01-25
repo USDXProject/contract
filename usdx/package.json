@@ -1,0 +1,21 @@
+{
+  "name": "ustx-contracts",
+  "version": "1.0.0",
+  "description": "Ustx Token crowdsale contracts",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test --network test"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "Wenqi Deng<wenqi@ustx.money>",
+  "devDependencies": {
+    "bluebird": "^3.5.1",
+    "chai": "^4.1.2",
+    "ethereumjs-testrpc": "^6.0.3"
+  }
+}
