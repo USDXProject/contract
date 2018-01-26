@@ -126,7 +126,7 @@ contract CrowdsaleController is USDXToken {
         uint256 additionalTokens =
         safeMul(totalSupply, founderPercentOfTotal) / (100 - founderPercentOfTotal);
         totalSupply = safeAdd(totalSupply, additionalTokens);
-        balanceOf[lockedAllocation] = safeAdd(balanceOf[founder], additionalTokens);
+        balanceOf[lockedAllocation] = safeAdd(balanceOf[lockedAllocation], additionalTokens);
         Transfer(0, lockedAllocation, additionalTokens);
         Finalized(now);
 
