@@ -126,8 +126,8 @@ contract CrowdsaleController is USDXToken {
         uint256 additionalTokens =
         safeMul(totalSupply, founderPercentOfTotal) / (100 - founderPercentOfTotal);
         totalSupply = safeAdd(totalSupply, additionalTokens);
-        balanceOf[founder] = safeAdd(balanceOf[founder], additionalTokens);
-        Transfer(0, founder, additionalTokens);
+        balanceOf[lockedAllocation] = safeAdd(balanceOf[founder], additionalTokens);
+        Transfer(0, lockedAllocation, additionalTokens);
         Finalized(now);
 
         // Transfer ETH to the Ustx Factory address.
