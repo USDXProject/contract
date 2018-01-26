@@ -1,23 +1,23 @@
 pragma solidity ^0.4.17;
-import "./UstxToken.sol";
+import "./USDXToken.sol";
 
 /// @title USTX Allocation - Time-locked vault of tokens allocated
 /// to developers and company
-contract USTXAllocation {
+contract USDXAllocation {
 
     uint256 constant totalAllocations = 30000;
 
     mapping (address => uint256) allocations;
 
-    UstxToken ustx;
+    USDXToken ustx;
     uint256 unlockedAt;
 
     uint256 tokensCreated = 0;
 
-    function USTXAllocation(address _ustxFactory)
+    function USDXAllocation(address _ustxFactory)
     public
     {
-        ustx =  UstxToken(msg.sender);
+        ustx =  USDXToken(msg.sender);
         unlockedAt = now + 6 * 30 days;
 
         //For the Ustx Factory;

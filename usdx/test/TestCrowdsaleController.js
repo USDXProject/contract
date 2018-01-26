@@ -178,12 +178,15 @@ contract('CrowdsaleController',function(accounts) {
 
              let from = accounts[1];
              let exchangeTokenWei = 1 * Math.pow(10,nativeDecimals);
+             let totalSupply = await token.totalSupply;
              await token.contribute(from, {value: exchangeTokenWei});
 
              let actualBalance = web3.toBigNumber(await token.balanceOf(from));
              let exchangeRate = await token.initialExchangeRate();
              let expectedBalance = web3.toBigNumber(1 * exchangeRate * Math.pow(10, decimals));
+             let expectedTotalSupply = await token.totalSupply;
              assert.equal(actualBalance.toString(), expectedBalance.toString());
+             assert.equal(totalSupply.toString(), expectedTotalSupply.toString());
 
         });
     });

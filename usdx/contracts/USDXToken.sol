@@ -7,7 +7,7 @@ interface tokenRecipient { function receiveApproval(address _from, uint256 _valu
 /**
  * @title The final Ustx token
  */
-contract UstxToken  is MintableToken,BurnableToken {
+contract USDXToken  is MintableToken,BurnableToken {
 
     // Enum that indicates the direction of monetary policy after an exchange
     // rate change. For example, an increase in exchange rate results in
@@ -48,7 +48,7 @@ contract UstxToken  is MintableToken,BurnableToken {
      */
     event StableCoins(address indexed target, MonetaryPolicy policy,uint256 amount);
 
-    function UstxToken(
+    function USDXToken(
         string _name,
         string _symbol,
         uint256 _decimals)

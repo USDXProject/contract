@@ -1,7 +1,7 @@
 {
-  "name": "ustx-contracts",
+  "name": "usdx-contracts",
   "version": "1.0.0",
-  "description": "Ustx Token crowdsale contracts",
+  "description": "USDX Token crowdsale contracts",
   "directories": {
     "test": "test"
   },
@@ -12,7 +12,7 @@
     "type": "git",
     "url": ""
   },
-  "author": "Wenqi Deng<wenqi@ustx.money>",
+  "author": "Wenqi Deng<wenqi@usdx.money>",
   "devDependencies": {
     "bluebird": "^3.5.1",
     "chai": "^4.1.2",

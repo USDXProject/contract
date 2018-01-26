@@ -1,15 +1,15 @@
 /* global artifacts, contract, it, assert */
 /* eslint-disable prefer-reflect */
 
-const UstxToken = artifacts.require('UstxToken.sol');
+const USDXToken = artifacts.require('USDXToken.sol');
 const invalidAccount = '0x0';
 
-contract('UstxToken', (accounts) => {
+contract('USDXToken', (accounts) => {
 
     let token = null;
 
     beforeEach(async function () {
-        token = await UstxToken.new('USTX','USTX',0);
+        token = await USDXToken.new('USDX','USDX',0);
     });
 
     it('should add _to address to list of known addresses after transfer', async () => {

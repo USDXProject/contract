@@ -1,8 +1,8 @@
 pragma solidity ^0.4.17;
-import './UstxToken.sol';
-import "./USTXAllocation.sol";
+import './USDXToken.sol';
+import "./USDXAllocation.sol";
 
-contract CrowdsaleController is UstxToken {
+contract CrowdsaleController is USDXToken {
     uint256 public constant nativeDecimals = 18;//ether or bitcoin decimal
 
     uint256 public saleAmount = 1600 * (10**3) * (10**  decimals); // 1.6 billion USTX ever created
@@ -20,7 +20,7 @@ contract CrowdsaleController is UstxToken {
     // Receives ETH and its own GNT endowment.
     address public founder = 0x0; // the contract creator's address
 
-    USTXAllocation lockedAllocation;
+    USDXAllocation lockedAllocation;
     // The current total token supply.
     uint256 totalTokens;
 
@@ -40,7 +40,7 @@ contract CrowdsaleController is UstxToken {
         _;
     }
 
-    //Set ICO start time, duration, exchange rate, minimum target, maximum target, tokens, symbols
+    //Set ICO start block, end block, exchange rate, minimum target, maximum target, tokens, symbols
     function CrowdsaleController(
         uint256 _fundingStartBlock,
         uint256 _fundingEndBlock,
@@ -51,7 +51,7 @@ contract CrowdsaleController is UstxToken {
         string _symbol,
         uint256 _decimals)
     public
-    UstxToken(_name, _symbol,_decimals)
+    USDXToken(_name, _symbol,_decimals)
     validAmount(_founderPercentOfTotal)
     validAmount(_presaleAmount)
     validAmount(_initialExchangeRate)
