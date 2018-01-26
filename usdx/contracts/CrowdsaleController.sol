@@ -71,7 +71,7 @@ contract CrowdsaleController is USDXToken {
         initialExchangeRate = _initialExchangeRate;
         founderPercentOfTotal = _founderPercentOfTotal;
 
-        lockedAllocation = new USTXAllocation(founder);
+        lockedAllocation = new USDXAllocation(founder);
         //Mint the presale tokens, distribute to a receiver
         mint(owner,presaleAmountTokens);
 
@@ -121,7 +121,7 @@ contract CrowdsaleController is USDXToken {
         // Create additional USTX for the USTX Factory and developers as
         // the 18% of total number of tokens.
         // All additional tokens are transfered to the account controller by
-        // USTXAllocation contract which will not allow using them for 6 months.
+        // USDXAllocation contract which will not allow using them for 6 months.
 
         uint256 additionalTokens =
         safeMul(totalSupply, founderPercentOfTotal) / (100 - founderPercentOfTotal);
