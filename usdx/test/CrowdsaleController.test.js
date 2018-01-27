@@ -174,19 +174,22 @@ contract('CrowdsaleController',function(accounts) {
             }
         });
         it('accept buying token between start and end block', async () => {
-            await blockHeightManager.mineTo(validPurchaseBlock);
+             await blockHeightManager.mineTo(validPurchaseBlock);
 
              let from = accounts[1];
-             let exchangeTokenWei = 1 * Math.pow(10,nativeDecimals);
-             let totalSupply = await token.totalSupply;
-             await token.contribute(from, {value: exchangeTokenWei});
+             let weiAmount = 1 * Math.pow(10,nativeDecimals);
+
+             let totalSupply = await token.totalSupply();
+
+             await token.contribute(from, {value: weiAmount});
 
              let actualBalance = web3.toBigNumber(await token.balanceOf(from));
              let exchangeRate = await token.initialExchangeRate();
              let expectedBalance = web3.toBigNumber(1 * exchangeRate * Math.pow(10, decimals));
-             let expectedTotalSupply = await token.totalSupply;
+             let actualTotalSupply = await token.totalSupply();
+             let expectedTotalSupply = expectedBalance.plus(totalSupply);
              assert.equal(actualBalance.toString(), expectedBalance.toString());
-             assert.equal(totalSupply.toString(), expectedTotalSupply.toString());
+             assert.equal(actualTotalSupply.toString(), expectedTotalSupply.toString());
 
         });
     });

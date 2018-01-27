@@ -1,13 +1,18 @@
 pragma solidity ^0.4.17;
-import './MintableToken.sol';
-import './BurnableToken.sol';
+
+import './TargetedBurnableToken.sol';
+import 'zeppelin-solidity/contracts/math/SafeMath.sol';
+import 'zeppelin-solidity/contracts/token/ERC20/BurnableToken.sol';
+import 'zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol';
+import 'zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
 
 
 interface tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; }
 /**
  * @title The final USDX token
  */
-contract USDXToken  is MintableToken,BurnableToken {
+contract USDXToken is MintableToken, TargetedBurnableToken {
+    using SafeMath for uint256;
 
     // Enum that indicates the direction of monetary policy after an exchange
     // rate change. For example, an increase in exchange rate results in
@@ -25,12 +30,12 @@ contract USDXToken  is MintableToken,BurnableToken {
 
     string public constant tokenName = "USDX";//token name
     string public constant tokenSymbol = "USDX";//token symbol
-    //uint256 public initialSupply = 2*10**9;// initial total amount
-    //uint8 public constant tokenDecimals = 8;
 
     uint256 public initialSupply = 3000;// initial total amount
-    uint8 public constant tokenDecimals = 0;
-    uint256 public tokenTotalSupply = 20 * (10**3) * (10**  decimals); // 2 billion USDX ever created
+    //uint8 public constant tokenDecimals = 0;
+    uint8 public constant decimals = 8;
+    //uint256 public tokenTotalSupply = 20 * (10**3) * (10**  decimals); // 2 trillion USDX ever created
+    uint256 public tokenTotalSupply = 2000000000000; // 2 trillion USDX ever created
 
 
     uint256 public stabledRate;//Exchange rate
@@ -52,12 +57,19 @@ contract USDXToken  is MintableToken,BurnableToken {
         string _name,
         string _symbol,
         uint256 _decimals)
-    ERC20Token(_name, _symbol,_decimals)
+    //DetailedERC20(_name, _symbol,_decimals)
     public {
         //balanceOf[msg.sender] = totalSupply;
         owner = msg.sender;
         coinStatus[msg.sender] = CoinStatus.Share;
         allTokenAddr.push(msg.sender);
+    }
+
+    // validates an address - currently only checks that it isn't null
+    modifier validAddress(address _address)
+    {
+        require(_address != 0x0);
+        _;
     }
 
     function approveAndCall(
@@ -104,7 +116,7 @@ contract USDXToken  is MintableToken,BurnableToken {
     {
         // If the _to address is in Initial status and has no balance, then add
         // it to the list of addresses.
-        if (balanceOf[_to] == 0 && coinStatus[_to] == CoinStatus.Initial){
+        if (balances[_to] == 0 && coinStatus[_to] == CoinStatus.Initial){
             coinStatus[_to] = CoinStatus.Share;
             allTokenAddr.push(_to);
         }
@@ -117,13 +129,15 @@ contract USDXToken  is MintableToken,BurnableToken {
     internal
     returns (bool)
     {
-        uint256 checkedSupply = safeAdd(totalSupply,_amount);
+        //uint256 checkedSupply = safeAdd(totalSupply,_amount);
+        uint256 checkedSupply = totalSupply_.add(_amount);
         require(checkedSupply <= tokenTotalSupply);
 
-        totalSupply += _amount;
-        balanceOf[_to] = safeAdd(balanceOf[_to],_amount);
+        totalSupply_ += _amount;
+        //balanceOf[_to] = safeAdd(balanceOf[_to],_amount);
+        balances[_to] = balances[_to].add(_amount);
 
-        MintCrowdSale(totalSupply, _to, _amount);
+        MintCrowdSale(totalSupply_, _to, _amount);
 
         return true;
     }
@@ -167,7 +181,7 @@ contract USDXToken  is MintableToken,BurnableToken {
         for(uint256 i=0; i< allTokenAddr.length; i++){
 
             address addr = allTokenAddr[i];
-            uint256 balance = balanceOf[addr];
+            uint256 balance = balances[addr];
 
             // Proceed if and only if the user's balance is positive and the
             // coins haven't been stalized yet.
@@ -179,7 +193,7 @@ contract USDXToken  is MintableToken,BurnableToken {
                     // Calculate the number of excess coins to burn.
                     uint256 newBalance = balance * stabledRate / 100;
                     burn(addr, balance - newBalance);
-                    StableCoins(addr, MonetaryPolicy.Contraction, balanceOf[addr]);
+                    StableCoins(addr, MonetaryPolicy.Contraction, balances[addr]);
                 } else if(stabledRate > 100) {
                     // Calculate the number of new coins to mint.
                     uint256 _amount = (balance * stabledRate / 100) - oldBalance;

@@ -17,5 +17,8 @@
     "bluebird": "^3.5.1",
     "chai": "^4.1.2",
     "ethereumjs-testrpc": "^6.0.3"
+  },
+  "dependencies": {
+    "zeppelin-solidity": "^1.6.0"
   }
 }
