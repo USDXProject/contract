@@ -1,4 +1,5 @@
 .DS_Store
+contract.iml
 build/
 /build/
 usdx/.idea/

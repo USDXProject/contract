@@ -59,12 +59,12 @@ contract CrowdsaleController is USDXToken {
     {
         require(_fundingStartBlock >= block.number);
         require(_fundingEndBlock >= _fundingStartBlock);
+        require(nativeDecimals >= _decimals);
 
         uint256 presaleAmountTokens = _presaleAmount * (10**decimals);
         require(presaleAmountTokens <= saleAmount);
         founder = msg.sender;
 
-        assert(nativeDecimals >= _decimals);
 
         fundingStartBlock = _fundingStartBlock;
         fundingEndBlock = _fundingEndBlock;

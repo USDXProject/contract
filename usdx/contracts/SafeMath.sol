@@ -15,7 +15,7 @@ contract SafeMath {
     returns (uint256)
     {
         uint256 z = _x + _y;
-        assert(z >= _x);
+        require(z >= _x);
         return z;
     }
 
@@ -24,7 +24,7 @@ contract SafeMath {
     pure
     returns (uint256)
     {
-        assert(_x >= _y);
+        require(_x >= _y);
         return _x - _y;
     }
 
@@ -34,7 +34,7 @@ contract SafeMath {
     returns (uint256)
     {
         uint256 z = _x * _y;
-        assert(_x == 0 || z / _x == _y);
+        require(_x == 0 || z / _x == _y);
         return z;
     }
 
