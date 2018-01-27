@@ -5,7 +5,7 @@ import './BurnableToken.sol';
 
 interface tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; }
 /**
- * @title The final Ustx token
+ * @title The final USDX token
  */
 contract USDXToken  is MintableToken,BurnableToken {
 
@@ -23,14 +23,14 @@ contract USDXToken  is MintableToken,BurnableToken {
     // account is first activated with no coin balance.
     enum CoinStatus { Initial, Share, Stable }
 
-    string public constant tokenName = "USTX";//token name
-    string public constant tokenSymbol = "USTX";//token symbol
+    string public constant tokenName = "USDX";//token name
+    string public constant tokenSymbol = "USDX";//token symbol
     //uint256 public initialSupply = 2*10**9;// initial total amount
     //uint8 public constant tokenDecimals = 8;
 
     uint256 public initialSupply = 3000;// initial total amount
     uint8 public constant tokenDecimals = 0;
-    uint256 public tokenTotalSupply = 20 * (10**3) * (10**  decimals); // 2 billion USTX ever created
+    uint256 public tokenTotalSupply = 20 * (10**3) * (10**  decimals); // 2 billion USDX ever created
 
 
     uint256 public stabledRate;//Exchange rate
