@@ -5,7 +5,7 @@ import "./USDXAllocation.sol";
 contract CrowdsaleController is USDXToken {
     uint256 public constant nativeDecimals = 18;//ether or bitcoin decimal
 
-    uint256 public saleAmount = 1600 * (10**3) * (10**  decimals); // 1.6 billion USTX ever created
+    uint256 public saleAmount = 1600 * (10**3) * (10**  decimals); // 1.6 billion USDX ever created
 
     string public constant version = "0.1";
 
@@ -118,7 +118,7 @@ contract CrowdsaleController is USDXToken {
         assert(block.number >= fundingEndBlock);// && totalSupply >= tokenContributionMin
 
         funding = false;
-        // Create additional USTX for the USTX Factory and developers as
+        // Create additional USDX for the USDX Factory and developers as
         // the 18% of total number of tokens.
         // All additional tokens are transfered to the account controller by
         // USDXAllocation contract which will not allow using them for 6 months.
@@ -130,19 +130,19 @@ contract CrowdsaleController is USDXToken {
         Transfer(0, lockedAllocation, additionalTokens);
         Finalized(now);
 
-        // Transfer ETH to the Ustx Factory address.
+        // Transfer ETH to the USDX Factory address.
         founder.transfer(this.balance);
 
 
 
     }
     /**
-     *  @notice Shows the amount of USTX the user will receive for amount of exchanged wei
+     *  @notice Shows the amount of USDX the user will receive for amount of exchanged wei
      * @param _weiAmount Exchanged wei amount to convert
-     * @param _tokenContributionRate Number of USTX per exchange token
-     * @param _nativeDecimals Number of decimals of the token being exchange for USTX
-     * @param _decimals Number of decimals of USTX token
-     * @return The amount of USTX that will be received
+     * @param _tokenContributionRate Number of USDX per exchange token
+     * @param _nativeDecimals Number of decimals of the token being exchange for USDX
+     * @param _decimals Number of decimals of USDX token
+     * @return The amount of USDX that will be received
      */
     function getTokenExchangeAmount(
         uint256 _weiAmount,

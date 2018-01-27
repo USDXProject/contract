@@ -1,7 +1,7 @@
 pragma solidity ^0.4.17;
 import "./USDXToken.sol";
 
-/// @title USTX Allocation - Time-locked vault of tokens allocated
+/// @title USDX Allocation - Time-locked vault of tokens allocated
 /// to developers and company
 contract USDXAllocation {
 
@@ -9,19 +9,19 @@ contract USDXAllocation {
 
     mapping (address => uint256) allocations;
 
-    USDXToken ustx;
+    USDXToken usdx;
     uint256 unlockedAt;
 
     uint256 tokensCreated = 0;
 
-    function USDXAllocation(address _ustxFactory)
+    function USDXAllocation(address _usdxFactory)
     public
     {
-        ustx =  USDXToken(msg.sender);
+        usdx =  USDXToken(msg.sender);
         unlockedAt = now + 6 * 30 days;
 
-        //For the Ustx Factory;
-        allocations[_ustxFactory] = 20000;
+        //For the USDX Factory;
+        allocations[_usdxFactory] = 20000;
 
         // For developers:
         allocations[0x7778c48a49cf2750d7cac060cbea9ea4c0121606] = 2500; // 25.0% of developers' allocations (10000).
@@ -56,13 +56,13 @@ contract USDXAllocation {
         require(now > unlockedAt);
 
         if(tokensCreated == 0)
-            tokensCreated = ustx.balanceOf(this);
+            tokensCreated = usdx.balanceOf(this);
 
         var allocation = allocations[msg.sender];
         allocations[msg.sender] = 0;
         var toTransfer = tokensCreated * allocation / totalAllocations;
 
-        ustx.transfer(msg.sender,toTransfer);
+        usdx.transfer(msg.sender,toTransfer);
 
     }
 
