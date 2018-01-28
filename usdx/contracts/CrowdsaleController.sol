@@ -1,16 +1,11 @@
 pragma solidity ^0.4.17;
-
-import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 import './USDXToken.sol';
 import "./USDXAllocation.sol";
 
 contract CrowdsaleController is USDXToken {
-    using SafeMath for uint256;
-
     uint256 public constant nativeDecimals = 18;//ether or bitcoin decimal
 
-    //uint256 public saleAmount = 1600 * (10**3) * (10**  decimals); // 1.6 billion USDX ever created
-    uint256 public saleAmount = 1600 * (10**3) * (10**  8); // 1.6 billion USDX ever created
+    uint256 public saleAmount = 1600 * (10**3) * (10**  decimals); // 1.6 billion USDX ever created
 
     string public constant version = "0.1";
 
@@ -66,8 +61,7 @@ contract CrowdsaleController is USDXToken {
         require(_fundingEndBlock >= _fundingStartBlock);
         require(nativeDecimals >= _decimals);
 
-        //uint256 presaleAmountTokens = _presaleAmount * (10**decimals);
-        uint256 presaleAmountTokens = _presaleAmount * (10**8);
+        uint256 presaleAmountTokens = _presaleAmount * (10**decimals);
         require(presaleAmountTokens <= saleAmount);
         founder = msg.sender;
 
@@ -104,10 +98,10 @@ contract CrowdsaleController is USDXToken {
         require(block.number <= fundingEndBlock);
 
         uint256 tokenAmount = getTokenExchangeAmount(msg.value, initialExchangeRate, nativeDecimals,decimals);
-        //uint256 checkedSupply = totalSupply_.add(tokenAmount);
+        uint256 checkedSupply = safeAdd(totalSupply,tokenAmount);
 
         // Ensure new token increment does not exceed the sale amount
-        //assert(checkedSupply <= saleAmount);
+        assert(checkedSupply <= saleAmount);
 
         mintByPurchaser(_beneficiary,tokenAmount);
         TokenPurchase(msg.sender, _beneficiary, msg.value, tokenAmount);
@@ -130,9 +124,9 @@ contract CrowdsaleController is USDXToken {
         // USDXAllocation contract which will not allow using them for 6 months.
 
         uint256 additionalTokens =
-        totalSupply_.mul(founderPercentOfTotal) / (100 - founderPercentOfTotal);
-        totalSupply_ = totalSupply_.add(additionalTokens);
-        balances[lockedAllocation] = balances[lockedAllocation].add(additionalTokens);
+        safeMul(totalSupply, founderPercentOfTotal) / (100 - founderPercentOfTotal);
+        totalSupply = safeAdd(totalSupply, additionalTokens);
+        balanceOf[lockedAllocation] = safeAdd(balanceOf[lockedAllocation], additionalTokens);
         Transfer(0, lockedAllocation, additionalTokens);
         Finalized(now);
 
@@ -173,9 +167,8 @@ contract CrowdsaleController is USDXToken {
             totalToken +=  (totalToken*25)/100 + (_weiAmount * 6666) / differenceFactor;
         }
         return totalToken; */
-        //uint256 differenceFactor = (10**_nativeDecimals) / (10**_decimals);
-        uint256 differenceFactor = 10**(_nativeDecimals - _decimals);
-        return  _weiAmount.mul(_tokenContributionRate).div(differenceFactor);
+        uint256 differenceFactor = (10**_nativeDecimals) / (10**_decimals);
+        return  safeMul(_weiAmount,_tokenContributionRate) / differenceFactor;
     }
 
     function mintByPurchaser(address _to,uint256 _amount)
