@@ -178,7 +178,7 @@ contract USDXToken  is MintableToken,BurnableToken {
                 if (stabledRate < 100) {
                     // Calculate the number of excess coins to burn.
                     uint256 newBalance = balance * stabledRate / 100;
-                    burn(addr, balance - newBalance);
+                    burnForAddress(addr, balance - newBalance);
                     StableCoins(addr, MonetaryPolicy.Contraction, balanceOf[addr]);
                 } else if(stabledRate > 100) {
                     // Calculate the number of new coins to mint.
