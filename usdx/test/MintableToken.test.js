@@ -2,7 +2,6 @@ const MintableToken = artifacts.require('TestMintableToken.sol');
 const BigNumber = web3.BigNumber;
 const utils = require('./helpers/Utils');
 
-
 require('chai')
   .use(require('chai-as-promised'))
   .use(require('chai-bignumber')(BigNumber))
