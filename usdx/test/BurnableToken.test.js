@@ -66,21 +66,15 @@ contract('BurnableToken', function (accounts) {
     let balance1 = await token.balanceOf(accounts[1]);
     balance1.should.be.bignumber.equal(300);
 
-    // Verify that account 1 can't burn token for itself.
-    try {
-       await token.burn(100, { from: accounts[1] });
-       assert(false, "didn't throw");
-    } catch (error) {
-       return utils.ensureException(error);
-    }
+    // Verify that account 1 can't burn token for itself and the operation is
+    // reverted.
+    await token.burn(100, { from: accounts[1] })
+      .should.be.rejectedWith(utils.revert);
 
-    // Verify that account 1 can't burn token for another account.
-    try {
-       await token.burnForAddress(accounts[0], 100, { from: accounts[1] });
-       assert(false, "didn't throw");
-    } catch (error) {
-       return utils.ensureException(error);
-    }
+    // Verify that account 1 can't burn token for another account and the
+    // operation is reverted.
+    await token.burnForAddress(accounts[0], 100, { from: accounts[1] })
+      .should.be.rejectedWith(utils.revert);
 
     // Verify balance in account 0 is intact.
     balance1 = await token.balanceOf(accounts[0]);
@@ -96,12 +90,9 @@ contract('BurnableToken', function (accounts) {
   });
 
   it('cannot burn more tokens than balance', async function () {
-     try {
-         await token.burn(2000, { from: accounts[0] });
-         assert(false, "didn't throw");
-     } catch (error) {
-         return utils.ensureException(error);
-     }
+    // Verify that burning more token than balance is reverted.
+    await token.burn(2000, { from: accounts[0] })
+      .should.be.rejectedWith(utils.revert);
 
     // Verify balance in account 0 is intact.
     let balance1 = await token.balanceOf(accounts[0]);
