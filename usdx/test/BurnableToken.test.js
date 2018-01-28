@@ -28,6 +28,8 @@ contract('BurnableToken', function (accounts) {
 
     const event = logs.find(e => e.event === 'Burn');
     expect(event).to.exist;
+    event.args.burner.should.equal(accounts[0]);
+    event.args.value.should.be.bignumber.equal(1);
   });
 
   it('owner should be able to burn tokens for another address', async function () {
@@ -54,6 +56,8 @@ contract('BurnableToken', function (accounts) {
     // Verify that event is correctly emitted.
     const event = logs.find(e => e.event === 'Burn');
     expect(event).to.exist;
+    event.args.burner.should.equal(accounts[1]);
+    event.args.value.should.be.bignumber.equal(100);
   });
 
   it('non-owner should not be able to burn tokens for any address', async function () {
