@@ -7,6 +7,13 @@ require('chai')
   .should();
 
 
+function burnEvent(result, burner, value) {
+    let burnEvent = result.logs.find(e => e.event === 'Burn');
+    expect(burnEvent).to.exist;
+    burnEvent.args.burner.should.equal(burner);
+    burnEvent.args.value.should.be.bignumber.equal(value);
+}
+
 function transferEvent(result, from, to, amount) {
     let transferEvent = result.logs.find(e => e.event === 'Transfer');
     expect(transferEvent).to.exist;
@@ -29,7 +36,8 @@ function never(result, eventType) {
 }
 
 module.exports = {
-    transferEvent: transferEvent,
     approvalEvent: approvalEvent,
+    burnEvent: burnEvent,
+    transferEvent: transferEvent,
     never: never,
 };

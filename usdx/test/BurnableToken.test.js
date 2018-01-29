@@ -1,5 +1,6 @@
 const TestBurnableToken = artifacts.require('TestBurnableToken.sol');
 const BigNumber = web3.BigNumber;
+const EventVerifier = require('./helpers/EventVerifier');
 const utils = require('./helpers/Utils');
 
 require('chai')
@@ -18,18 +19,14 @@ contract('BurnableToken', function (accounts) {
   });
 
   it('owner should be able to burn tokens for themselves', async function () {
-    const { logs } = await token.burn(1, { from: accounts[0] });
+    const result = await token.burn(1, { from: accounts[0] });
+    EventVerifier.burnEvent(result, accounts[0], 1);
 
     const balance = await token.balanceOf(accounts[0]);
     balance.should.be.bignumber.equal(expectedTokenSupply);
 
     const totalSupply = await token.totalSupply();
     totalSupply.should.be.bignumber.equal(expectedTokenSupply);
-
-    const event = logs.find(e => e.event === 'Burn');
-    expect(event).to.exist;
-    event.args.burner.should.equal(accounts[0]);
-    event.args.value.should.be.bignumber.equal(1);
   });
 
   it('owner should be able to burn tokens for another address', async function () {
@@ -43,7 +40,8 @@ contract('BurnableToken', function (accounts) {
     balance1.should.be.bignumber.equal(300);
 
     // Burn token in account 1 from account 0.
-    const { logs } = await token.burnForAddress(accounts[1], 100, { from: accounts[0] });
+    const result = await token.burnForAddress(accounts[1], 100, { from: accounts[0] });
+    EventVerifier.burnEvent(result, accounts[1], 100);
 
     // Verify token in account 1 is successfully burnt.
     balance1 = await token.balanceOf(accounts[1]);
@@ -52,12 +50,6 @@ contract('BurnableToken', function (accounts) {
     // Verify that total supply is reduced accordingly.
     const totalSupply = await token.totalSupply();
     totalSupply.should.be.bignumber.equal(900);
-
-    // Verify that event is correctly emitted.
-    const event = logs.find(e => e.event === 'Burn');
-    expect(event).to.exist;
-    event.args.burner.should.equal(accounts[1]);
-    event.args.value.should.be.bignumber.equal(100);
   });
 
   it('non-owner should not be able to burn tokens for any address', async function () {
