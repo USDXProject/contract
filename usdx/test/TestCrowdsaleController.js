@@ -189,6 +189,198 @@ contract('CrowdsaleController',function(accounts) {
              assert.equal(totalSupply.toString(), expectedTotalSupply.toString());
 
         });
+
+        it('reject zero value purchase', async () => {
+            await blockHeightManager.mineTo(validPurchaseBlock);
+
+            let blockNumber = await requester.getBlockNumberAsync();
+            assert.isAtMost(blockNumber,config.endBlock);
+            assert.isAtLeast(blockNumber,config.startBlock);
+            let from = accounts[1];
+            let exchangeTokenWei = 0;
+            try{
+                await token.contribute(from,{value:exchangeTokenWei});
+                assert.fail();
+            }catch(e){
+                assert.match(e.toString(),regexError);
+            }
+        });
+
+        it('uses the fallback function to buy tokens if buyToken() is not used', async () => {
+            await blockHeightManager.mineTo(validPurchaseBlock);
+
+            let blockNumber = await requester.getBlockNumberAsync();
+            assert.isAtMost(blockNumber,config.endBlock);
+            assert.isAtLeast(blockNumber,config.startBlock);
+
+            let from = accounts[1];
+            let exchangeTokenWei = 1 * Math.pow(10,nativeDecimals);
+
+            await requester.sendTransactionAsync({
+                to:token.address,
+                from:from,
+                value:exchangeTokenWei
+            });
+
+            let actualBalance = web3.toBigNumber(await token.balanceOf(from));
+            let exchangeRate = await token.initialExchangeRate();
+            let expectedBalance = web3.toBigNumber(1 * exchangeRate * Math.pow(10, decimals));
+            assert.equal(actualBalance.toString(),expectedBalance.toString());
+
+        });
+
+        it('allows an address to buy tokens on behalf of a beneficiary', async () => {
+            await blockHeightManager.mineTo(validPurchaseBlock);
+
+            let purchaser = accounts[1];
+            let beneficiary = accounts[2];
+            let exchangeTokenWei = 1 * Math.pow(10,nativeDecimals);
+            await token.contribute(beneficiary,{from:purchaser,value:exchangeTokenWei});
+
+            let purchaserBalance = await token.balanceOf(purchaser);
+            assert.equal(purchaserBalance.toNumber(),0,"Purchaser balance should be 0.");
+
+            let beneficiaryBalance = await token.balanceOf(beneficiary);
+            let exchangeRate = await token.initialExchangeRate();
+            let expectedBeneficiaryBalance = await token.getTokenExchangeAmount(exchangeTokenWei,exchangeRate,
+            nativeDecimals,decimals);
+            assert.equal(beneficiaryBalance.toString(),expectedBeneficiaryBalance.toString(),
+            "beneficiary balance does not match.")
+        });
+
+        it('sends the balance to the correct address if the beneficiary is the purchaser', async () => {
+            await blockHeightManager.mineTo(validPurchaseBlock);
+
+            let purchaser = accounts[1];
+            let beneficiary = accounts[1];
+            let exchangeTokenWei = 1 * Math.pow(10, nativeDecimals);
+            await token.contribute(beneficiary, {from: purchaser, value: exchangeTokenWei});
+
+            let balance = await token.balanceOf(purchaser);
+            let exchangeRate = await token.initialExchangeRate();
+            let expectedBalance = await token.getTokenExchangeAmount(exchangeTokenWei, exchangeRate, nativeDecimals, decimals);
+            assert.equal(balance.toString(), expectedBalance.toString(), "Balance does not match.");
+
+        });
+
+        it('does not allow buying tokens once sale amount has been reached', async () => {
+            var totalSupply = web3.toBigNumber(await token.totalSupply());
+            let presaleAmount = web3.toBigNumber(config.presaleAmount * Math.pow(10, decimals));
+            assert.equal(totalSupply.toString(), presaleAmount.toString(), "Initial supply should match presale amount.");
+
+            await blockHeightManager.mineTo(validPurchaseBlock);
+
+            // Determine max number of tokens to purchase
+            // 60e14 (total) - 30e14 (presale) = 30e14 (for purchase)
+            let saleAmount = web3.toBigNumber(await token.saleAmount());
+            let maxPurchaseTokens = saleAmount - presaleAmount;
+
+            // Reverse the logic for getTokenExchangeAmount()
+            let exchangeRate = await token.initialExchangeRate();
+            let differenceFactor = Math.pow(10, nativeDecimals) / Math.pow(10, decimals);
+            var exchangeTokenWei = maxPurchaseTokens / exchangeRate * differenceFactor;
+
+            var purchaser = accounts[1];
+            await token.contribute(purchaser, {from: purchaser, value: exchangeTokenWei});
+
+            totalSupply = web3.toBigNumber(await token.totalSupply());
+            assert.equal(totalSupply.toString(), saleAmount.toString(), "Total supply should equal sale amount.");
+
+            purchaser = accounts[2];
+            exchangeTokenWei = 1 * Math.pow(10, nativeDecimals);
+
+            // try {
+            //     await token.contribute(purchaser, {from: purchaser, value: exchangeTokenWei});
+            //     assert.fail();
+            // } catch(e) {
+            //     assert.match(e.toString(), regexError);
+            // }
+            try{
+                await token.contribute(purchaser,{from: purchaser,value:exchangeTokenWei});
+                assert.fail();
+            }catch(e){
+                assert.match(e.toString(),regexError);
+            }
+
+            totalSupply = web3.toBigNumber(await token.totalSupply());
+            assert.equal(totalSupply.toString(), saleAmount.toString(), "Total supply should match sale amount.");
+        });
+
+        describe('Forwarding Funds', () =>{
+            it('should forward funds to the owner',async () =>{
+                let owner = await token.owner();
+                let beforeTransferBalance = web3.toBigNumber(await requester.getBalanceAsync(owner));
+
+                await blockHeightManager.mineTo(validPurchaseBlock);
+
+                let from = accounts[1];
+                let exchangeTokenWei = 1 * Math.pow(10,nativeDecimals);
+                await token.contribute(from,{from:from,value:exchangeTokenWei});
+
+                let afterTransferBalance = web3.toBigNumber(await requester.getBalanceAsync(owner));
+                let actualBalance = afterTransferBalance.sub(beforeTransferBalance);
+                assert.equal(actualBalance.toString(),exchangeTokenWei.toString(),"Balances do not match.");
+
+            });
+
+            it('should revert all funds if transaction is failed', async () =>{
+                let owner = await token.owner();
+                let beforeBalance = await requester.getBalanceAsync(owner);
+
+                await  blockHeightManager.mineTo(config.startBlock -5);
+
+                let from = accounts[1];
+                let exchangeTokenWei = 1 * Math.pow(10,nativeDecimals);
+
+                try{
+                    await token.contribute(from,{from:from,value:exchangeTokenWei});
+                    assert.fail();
+                }catch(e) {
+                    assert.match(e.toString(),regexError);
+                }
+                let afterBalance = await requester.getBalanceAsync(owner);
+                assert.equal(beforeBalance.toString(),afterBalance.toString(),"Balances do not match.");
+
+            });
+        });
+
+
+        describe('Exchange', () => {
+            it('returns the correct exchange amount using the contract defined values', async ()=> {
+                let exchangeRate = await token.initialExchangeRate();
+                let exchangeTokenWei = 1 * Math.pow(10, nativeDecimals);
+                let actualAmount = await token.getTokenExchangeAmount(exchangeTokenWei, exchangeRate, nativeDecimals, decimals);
+
+                let expectedAmount = web3.toBigNumber(1 * exchangeRate * Math.pow(10,decimals));
+                assert.equal(actualAmount.toString(),expectedAmount.toString(),"Exchange amount does not match.");
+            });
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     });
+
+
 
 });

@@ -5,7 +5,7 @@ import "./USDXAllocation.sol";
 contract CrowdsaleController is USDXToken {
     uint256 public constant nativeDecimals = 18;//ether or bitcoin decimal
 
-    uint256 public saleAmount = 1600 * (10**3) * (10**  decimals); // 1.6 billion USDX ever created
+    uint256 public saleAmount = 20 * (10**3) * (10**  decimals); // 1.6 billion USDX ever created test 16000
 
     string public constant version = "0.1";
 
