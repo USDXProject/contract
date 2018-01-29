@@ -5,8 +5,8 @@ import "../ERC20Token.sol";
     Test token with predefined supply
 */
 contract TestERC20Token is ERC20Token {
-    string public constant tokenName = "USDX";//token name
-    string public constant tokenSymbol = "USDX";//token symbol
+    string public constant tokenName = "TestERC20";//token name
+    string public constant tokenSymbol = "TERC";//token symbol
     uint256 public initialSupply = 2000;// initial total amount
     uint256 public tokenDecimals = 0;
     function TestERC20Token()

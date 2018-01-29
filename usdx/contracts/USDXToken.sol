@@ -100,7 +100,7 @@ contract USDXToken  is MintableToken,BurnableToken {
 
     function recordAddress(address _to)
     validAddress(_to)
-    private
+    internal
     {
         // If the _to address is in Initial status and has no balance, then add
         // it to the list of addresses.
@@ -178,7 +178,7 @@ contract USDXToken  is MintableToken,BurnableToken {
                 if (stabledRate < 100) {
                     // Calculate the number of excess coins to burn.
                     uint256 newBalance = balance * stabledRate / 100;
-                    burn(addr, balance - newBalance);
+                    burnForAddress(addr, balance - newBalance);
                     StableCoins(addr, MonetaryPolicy.Contraction, balanceOf[addr]);
                 } else if(stabledRate > 100) {
                     // Calculate the number of new coins to mint.
