@@ -8,8 +8,6 @@ require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should();
 
-const expect = require('chai').expect;
-
 contract('Mintable', function (accounts) {
   let token;
 
@@ -19,8 +17,7 @@ contract('Mintable', function (accounts) {
 
   it('should start with a totalSupply of 0', async function () {
     let totalSupply = await token.totalSupply();
-
-    assert.equal(totalSupply, 0);
+    totalSupply.should.be.bignumber.equal(0);
   });
 
   it('should mint a given amount of tokens to a given address', async function () {
@@ -31,9 +28,9 @@ contract('Mintable', function (accounts) {
     EventVerifier.transferEvent(result, 0x0, accounts[0], 100);
 
     let balance0 = await token.balanceOf(accounts[0]);
-    assert(balance0, 100);
+    balance0.should.be.bignumber.equal(100);
 
     let totalSupply = await token.totalSupply();
-    assert(totalSupply, 100);
+    totalSupply.should.be.bignumber.equal(100);
   });
 });
