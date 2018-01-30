@@ -1,13 +1,14 @@
 pragma solidity ^0.4.17;
-import './MintableToken.sol';
 import './BurnableToken.sol';
+import './MintableToken.sol';
+import './StagedToken.sol';
 
 
 interface tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; }
 /**
  * @title The final USDX token
  */
-contract USDXToken  is MintableToken,BurnableToken {
+contract USDXToken is MintableToken, BurnableToken, StagedToken {
 
     // Enum that indicates the direction of monetary policy after an exchange
     // rate change. For example, an increase in exchange rate results in
@@ -16,12 +17,6 @@ contract USDXToken  is MintableToken,BurnableToken {
     // opposite where a portion of the circulating coins are collected and
     // destroyed, corresponding to the Contraction policy.
     enum MonetaryPolicy { Expansion, Contraction }
-
-    // Enum that indicates the status of coins. Share means the coins have
-    // not been pegged. After the initial pegging, coins status will turn to
-    // Stable. This process is irreversible. Initial is the state when the
-    // account is first activated with no coin balance.
-    enum CoinStatus { Initial, Share, Stable }
 
     string public constant tokenName = "USDX";//token name
     string public constant tokenSymbol = "USDX";//token symbol
@@ -35,8 +30,6 @@ contract USDXToken  is MintableToken,BurnableToken {
 
     uint256 public stabledRate;//Exchange rate
     mapping (address => bool) public frozenAccount;//Whether or not to freeze a list of accounts
-    mapping (address => CoinStatus) public coinStatus;
-    address[] public allTokenAddr;//All have a balance of the token address
 
     event MintCrowdSale(uint256 supply, address indexed to, uint256 amount);
     event FrozenFunds(address indexed target, bool frozen);
@@ -98,21 +91,10 @@ contract USDXToken  is MintableToken,BurnableToken {
         super.transferFrom(_from, _to, _value);
     }
 
-    function recordAddress(address _to)
-    validAddress(_to)
-    internal
-    {
-        // If the _to address is in Initial status and has no balance, then add
-        // it to the list of addresses.
-        if (balanceOf[_to] == 0 && coinStatus[_to] == CoinStatus.Initial){
-            coinStatus[_to] = CoinStatus.Share;
-            allTokenAddr.push(_to);
-        }
-    }
-    /// @dev Mint new tokens (only crowdsale used)
-    /// @param _to Address to mint the tokens to
-    /// @param _amount Amount of tokens that will be minted
-    /// @return Boolean to signify successful minting
+    // @dev Mint new tokens (only crowdsale used)
+    // @param _to Address to mint the tokens to
+    // @param _amount Amount of tokens that will be minted
+    // @return Boolean to signify successful minting
     function mintCrowdSale(address _to, uint256 _amount)
     internal
     returns (bool)
