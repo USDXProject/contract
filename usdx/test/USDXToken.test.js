@@ -13,14 +13,14 @@ contract('USDXToken', (accounts) => {
     });
 
     it('should add _to address to list of known addresses after transfer', async () => {
-        let address0 = await token.allTokenAddr(0);
+        let address0 = await token.stagedTokenAddresses(0);
         assert.equal(address0, accounts[0]);
 
         await token.mint(address0, 3000);
         // Verify that _to address is recorded after a transfer invocation.
         let _to = 0x123;
         await token.transfer(_to, 555);
-        let address1 = await token.allTokenAddr(1);
+        let address1 = await token.stagedTokenAddresses(1);
         assert.equal(address1, _to);
 
 
@@ -32,12 +32,12 @@ contract('USDXToken', (accounts) => {
         await token.approve(address0, 222);
         await token.transferFrom(address0, _to2, 222);
 
-        let address2 = await token.allTokenAddr(2);
+        let address2 = await token.stagedTokenAddresses(2);
         assert.equal(address2, _to2);
     });
 
     it('should add _to address to list of known addresses after transferFrom', async () => {
-        let address0 = await token.allTokenAddr(0);
+        let address0 = await token.stagedTokenAddresses(0);
         assert.equal(address0, accounts[0]);
         await token.mint(address0, 3000);
         // Verify that _to2 address is recorded after a transferFrom invocation.
@@ -48,7 +48,7 @@ contract('USDXToken', (accounts) => {
         await token.approve(address0, 222);
         await token.transferFrom(address0, _to, 222);
 
-        let address1 = await token.allTokenAddr(1);
+        let address1 = await token.stagedTokenAddresses(1);
         assert.equal(address1, _to);
     });
 

@@ -49,8 +49,7 @@ contract USDXToken is MintableToken, BurnableToken, StagedToken {
     public {
         //balanceOf[msg.sender] = totalSupply;
         owner = msg.sender;
-        coinStatus[msg.sender] = CoinStatus.Share;
-        allTokenAddr.push(msg.sender);
+        recordAddress(msg.sender);
     }
 
     function approveAndCall(
@@ -78,7 +77,6 @@ contract USDXToken is MintableToken, BurnableToken, StagedToken {
     accountFreezed(msg.sender)
     public
     returns (bool) {
-        recordAddress(_to);
         super.transfer(_to, _value);
     }
 
@@ -87,7 +85,6 @@ contract USDXToken is MintableToken, BurnableToken, StagedToken {
     public
     returns (bool)
     {
-        recordAddress(_to);
         super.transferFrom(_from, _to, _value);
     }
 
@@ -146,9 +143,9 @@ contract USDXToken is MintableToken, BurnableToken, StagedToken {
     onlyOwner
     public
     {
-        for(uint256 i=0; i< allTokenAddr.length; i++){
+        for(uint256 i=0; i< stagedTokenAddresses.length; i++){
 
-            address addr = allTokenAddr[i];
+            address addr = stagedTokenAddresses[i];
             uint256 balance = balanceOf[addr];
 
             // Proceed if and only if the user's balance is positive and the

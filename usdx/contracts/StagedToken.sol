@@ -18,18 +18,30 @@ contract StagedToken is ERC20Token {
     mapping (address => CoinStatus) public coinStatus;
 
     // A record of all addresses that contains (or once contained) this token.
-    address[] public allTokenAddr;
+    address[] public stagedTokenAddresses;
 
-    function recordAddress(address _to)
-    validAddress(_to)
-    internal
+    function transfer(address _to, uint256 _value)
+    public
+    returns (bool) {
+        recordAddress(_to);
+        super.transfer(_to, _value);
+    }
+
+    function transferFrom(address _from, address _to, uint256 _value)
+    public
+    returns (bool)
     {
+        recordAddress(_to);
+        super.transferFrom(_from, _to, _value);
+    }
+
+    function recordAddress(address _to) validAddress(_to) internal {
         // If the _to address is in Initial status and has no balance, then add
         // it to the list of addresses.
         if (coinStatus[_to] == CoinStatus.Initial){
-        //if (balanceOf[_to] == 0 && coinStatus[_to] == CoinStatus.Initial){
+            require(balanceOf[_to] == 0);
             coinStatus[_to] = CoinStatus.Share;
-            allTokenAddr.push(_to);
+            stagedTokenAddresses.push(_to);
         }
     }
 }
