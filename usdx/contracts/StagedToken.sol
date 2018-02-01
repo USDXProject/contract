@@ -1,5 +1,4 @@
 pragma solidity ^0.4.17;
-import './ERC20Token.sol';
 import './MintableToken.sol';
 import './Ownable.sol';
 

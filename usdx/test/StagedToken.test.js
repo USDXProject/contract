@@ -27,7 +27,9 @@ contract('StagedToken', function (accounts) {
   });
 
   it('should record address after transfer', async function () {
-    await token.transfer(accounts[1], 1000);
+    const result = await token.transfer(accounts[1], 1000);
+    EventVerifier.transferEvent(result, accounts[0], accounts[1], 1000);
+
     let receiver = await token.stagedTokenAddresses(1);
     receiver.should.equal(accounts[1]);
 
@@ -42,7 +44,9 @@ contract('StagedToken', function (accounts) {
   });
 
   it('should record address after mint', async function () {
-    await token.mint(accounts[2], 2000);
+    const result = await token.mint(accounts[2], 2000);
+    EventVerifier.mintEvent(result, accounts[2], 2000);
+
     let receiver = await token.stagedTokenAddresses(1);
     receiver.should.equal(accounts[2]);
 
