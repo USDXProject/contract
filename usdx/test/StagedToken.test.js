@@ -40,4 +40,22 @@ contract('StagedToken', function (accounts) {
     balance = await token.balanceOf(accounts[1]);
     balance.should.be.bignumber.equal(1000);
   });
+
+  it('should record address after mint', async function () {
+    await token.mint(accounts[2], 2000);
+    let receiver = await token.stagedTokenAddresses(1);
+    receiver.should.equal(accounts[2]);
+
+    let totalSupply = await token.totalSupply();
+    totalSupply.should.be.bignumber.equal(7000);
+
+    let balance = await token.balanceOf(accounts[0]);
+    balance.should.be.bignumber.equal(5000);
+
+    balance = await token.balanceOf(accounts[1]);
+    balance.should.be.bignumber.equal(0);
+
+    balance = await token.balanceOf(accounts[2]);
+    balance.should.be.bignumber.equal(2000);
+  });
 });
