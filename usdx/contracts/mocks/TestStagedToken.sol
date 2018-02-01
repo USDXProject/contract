@@ -11,6 +11,5 @@ contract TestStagedToken is StagedToken {
     totalSupply = initialSupply;
     recordAddress(msg.sender);
     balanceOf[msg.sender] = initialSupply;
-    //transferFrom(0x0, msg.sender, initialSupply);
   }
 }
