@@ -11,14 +11,6 @@ interface tokenRecipient { function receiveApproval(address _from, uint256 _valu
  */
 contract USDXToken is PeggableToken {
 
-    // Enum that indicates the direction of monetary policy after an exchange
-    // rate change. For example, an increase in exchange rate results in
-    // minting more coins to distribute, hence corresponding to the Expansion
-    // policy. A decrese in exchange rate, on the other hand, results in the
-    // opposite where a portion of the circulating coins are collected and
-    // destroyed, corresponding to the Contraction policy.
-    enum MonetaryPolicy { Expansion, Contraction }
-
     string public constant tokenName = "USDX";//token name
     string public constant tokenSymbol = "USDX";//token symbol
     //uint256 public initialSupply = 2*10**9;// initial total amount
@@ -29,18 +21,10 @@ contract USDXToken is PeggableToken {
     uint256 public tokenTotalSupply = 20 * (10**3) * (10**  decimals); // 2 billion USDX ever created
 
 
-    uint256 public stabledRate;//Exchange rate
     mapping (address => bool) public frozenAccount;//Whether or not to freeze a list of accounts
 
     event MintCrowdSale(uint256 supply, address indexed to, uint256 amount);
     event FrozenFunds(address indexed target, bool frozen);
-
-    /**
-     *@param target Target address
-     *@param policy The monetary policy used when stalizing coins
-     *@param amount Change amount
-     */
-    event StableCoins(address indexed target, MonetaryPolicy policy,uint256 amount);
 
     function USDXToken(
         string _name,
@@ -120,23 +104,5 @@ contract USDXToken is PeggableToken {
     {
         require(!frozenAccount[_to]);
         _;
-    }
-
-
-    function setStabledRate(uint256 newStabledRate)
-    onlyOwner
-    public
-    {
-        stabledRate = newStabledRate;
-    }
-
-    /*
-    *shareToken to  stableToken
-    */
-    function stableCoins()
-    onlyOwner
-    public
-    {
-        peg(stabledRate);
     }
 }

@@ -64,7 +64,7 @@ contract('USDXToken', (accounts) => {
         let stableRate = 200;
         await token.setStabledRate(stableRate);
 
-        await token.stableCoins();
+        await token.peg();
         let balance0 = await token.balanceOf.call(accounts[0]);
         let balance1 = await token.balanceOf.call(accounts[1]);
         let balance2 = await token.balanceOf.call(accounts[2]);
@@ -93,7 +93,7 @@ contract('USDXToken', (accounts) => {
         let stableRate = 90;
         await token.setStabledRate(stableRate);
 
-        await token.stableCoins();
+        await token.peg();
         let balance0 = await token.balanceOf.call(accounts[0]);
         let balance1 = await token.balanceOf.call(accounts[1]);
         let balance2 = await token.balanceOf.call(accounts[2]);
