@@ -1,6 +1,7 @@
 pragma solidity ^0.4.17;
 import './BurnableToken.sol';
 import './MintableToken.sol';
+import './PeggableToken.sol';
 import './StagedToken.sol';
 
 
@@ -8,7 +9,7 @@ interface tokenRecipient { function receiveApproval(address _from, uint256 _valu
 /**
  * @title The final USDX token
  */
-contract USDXToken is MintableToken, BurnableToken, StagedToken {
+contract USDXToken is PeggableToken {
 
     // Enum that indicates the direction of monetary policy after an exchange
     // rate change. For example, an increase in exchange rate results in
@@ -136,30 +137,6 @@ contract USDXToken is MintableToken, BurnableToken, StagedToken {
     onlyOwner
     public
     {
-        for(uint256 i=0; i< stagedTokenAddresses.length; i++){
-
-            address addr = stagedTokenAddresses[i];
-            uint256 balance = balanceOf[addr];
-
-            // Proceed if and only if the user's balance is positive and the
-            // coins haven't been stalized yet.
-            if (balance > 0 && coinStatus[addr] == CoinStatus.Share) {
-                coinStatus[addr] = CoinStatus.Stable;
-                uint256 oldBalance = balance;
-
-                if (stabledRate < 100) {
-                    // Calculate the number of excess coins to burn.
-                    uint256 newBalance = balance * stabledRate / 100;
-                    burnForAddress(addr, balance - newBalance);
-                    StableCoins(addr, MonetaryPolicy.Contraction, balanceOf[addr]);
-                } else if(stabledRate > 100) {
-                    // Calculate the number of new coins to mint.
-                    uint256 _amount = (balance * stabledRate / 100) - oldBalance;
-                    mint(addr, _amount);
-                    StableCoins(addr, MonetaryPolicy.Expansion, _amount);
-                }
-
-             }
-         }
-      }
+        peg(stabledRate);
+    }
 }
