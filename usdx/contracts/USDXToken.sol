@@ -66,13 +66,6 @@ contract USDXToken is MintableToken, BurnableToken, StagedToken {
         }
     }
 
-    function burn(uint256 _value)
-    onlyOwner
-    public
-    {
-        super.burn(_value);
-    }
-
     function transfer(address _to, uint256 _value)
     accountFreezed(msg.sender)
     public
