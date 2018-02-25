@@ -12,7 +12,6 @@ import "./SafeMath.sol";
  * owner.
  */
 contract USDXVesting is Ownable {
-  //using SafeMath for uint256;
 
   event Released(uint256 amount);
   event Revoked();
