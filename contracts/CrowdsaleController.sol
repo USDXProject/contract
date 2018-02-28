@@ -4,6 +4,9 @@ import './USDXToken.sol';
 contract CrowdsaleController is USDXToken {
     uint256 public constant nativeDecimals = 18;//ether or bitcoin decimal
 
+    mapping (address => bool) whiteList;//Buyers whiteListing mapping
+
+    bool public isOpen = false;//Is the crowd fund open?
     uint256 public totalSaleAmount = 3 * (10**8) * (10**  decimals); // 0.3 billion USDX ever created test 16000
     uint256 public saleAmount = 0;
 
@@ -32,6 +35,29 @@ contract CrowdsaleController is USDXToken {
     modifier validAmount(uint256 _amount) {
         require(_amount > 0);
         _;
+    }
+
+    //Ensures the crowdfund is ongoing
+    modifier crowdfundIsActive() {
+        require(isOpen && fundingStartBlock >= block.number && block.number <= fundingEndBlock);
+        _;
+    }
+    //Ensures only whiteListed address can buy tokens
+    modifier onlyWhiteList() {
+        require(whiteList[msg.sender]);
+        _;
+    }
+
+    //Open the crowdfunding
+    function openCrowdfund() external onlyOwner returns (bool success) {
+        require(isOpen == false);
+        isOpen = true;
+        return true;
+    }
+
+    function closeCrowdfund() external onlyOwner returns (bool success) {
+        isOpen = false;
+        return true;
     }
 
     function CrowdsaleController(
@@ -69,11 +95,13 @@ contract CrowdsaleController is USDXToken {
     function contribute(address _beneficiary)
     public
     payable
+    crowdfundIsActive
+    onlyWhiteList
     validAmount(msg.value)
     {
         require(_beneficiary != address(0));
-        require(block.number >= fundingStartBlock);
-        require(block.number <= fundingEndBlock);
+        //require(block.number >= fundingStartBlock);
+        //require(block.number <= fundingEndBlock);
 
         uint256 tokenAmount = getTokenExchangeAmount(msg.value, initialExchangeRate, nativeDecimals,decimals);
 
@@ -89,7 +117,13 @@ contract CrowdsaleController is USDXToken {
 
         owner.transfer(msg.value);
     }
-
+    //batch add whiteList
+    function whiteListAccounts(address[] _batchOfAddresses) external onlyOwner returns (bool success) {
+        for(uint256 i=0; i<_batchOfAddresses.length; i++){
+            whiteList[_batchOfAddresses[i]] = true;
+        }
+        return true;
+    }
 
     function finalize()
     onlyOwner
