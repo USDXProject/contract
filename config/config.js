@@ -5,7 +5,7 @@ function Config(web3) {
         startBlock: 2742083,
         endBlock: 2742983,
         initialExchangeRate: 100,
-        presaleAmount: 1*e8, // 30 million presale tokens
+        presaleAmount: 1e8, // 30 million presale tokens
         name:'USDX',
         symbol:'USDX',
         decimals:8
