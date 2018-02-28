@@ -6,10 +6,10 @@ contract CrowdsaleController is USDXToken {
 
     mapping (address => bool) whiteList;//Buyers whiteListing mapping
 
-    bool public isOpen = false;//Is the crowd fund open?
+    bool public funding = true;// funding state
     uint256 public totalSaleAmount = 3 * (10**8) * (10**  decimals); // 0.3 billion USDX ever created test 16000
-    uint256 public saleAmount = 0;
-
+    uint256 public saleAmount = 0; //already purchased token
+    uint256 public presaleAmount = 0;
     string public constant version = "0.1";
 
     bool public isRefund = false;//refund status
@@ -62,6 +62,7 @@ contract CrowdsaleController is USDXToken {
         uint256 _fundingStartBlock,
         uint256 _fundingEndBlock,
         uint256 _initialExchangeRate,
+        uint256 _presaleAmount,
         string _name,
         string _symbol,
         uint256 _decimals)
@@ -73,12 +74,16 @@ contract CrowdsaleController is USDXToken {
         require(_fundingEndBlock >= _fundingStartBlock);
         require(nativeDecimals >= _decimals);
 
+        uint256 presaleAmountTokens = _presaleAmount * (10**decimals);
+        require(presaleAmountTokens <= totalSaleAmount);
         founder = msg.sender;
 
         fundingStartBlock = _fundingStartBlock;
         fundingEndBlock = _fundingEndBlock;
         initialExchangeRate = _initialExchangeRate;
+        presaleAmount = _presaleAmount;
 
+        mintByPurchaser(founder, presaleAmountTokens);
         ContractCreated(address(this));
     }
 
@@ -110,8 +115,8 @@ contract CrowdsaleController is USDXToken {
         saleAmount = safeAdd(saleAmount,tokenAmount);
         TokenPurchase(msg.sender, _beneficiary, msg.value, tokenAmount);
 
-
-        owner.transfer(msg.value);
+        // Transfer ETH to the founder address.
+        founder.transfer(msg.value);
     }
     //batch add whiteList
     function whiteListAccounts(address[] _batchOfAddresses) external onlyOwner returns (bool success) {
@@ -126,9 +131,10 @@ contract CrowdsaleController is USDXToken {
     public
     {
 
-        require(isOpen == false);
+        require(funding);
         require(block.number >= fundingEndBlock);
 
+        funding = false;
         // Create additional USDX for the USDX Factory and developers as
         // the 18% of total number of tokens.
         // All additional tokens are transfered to the account controller by
@@ -138,12 +144,13 @@ contract CrowdsaleController is USDXToken {
         //totalSupply = safeAdd(totalSupply, additionalTokens);
         //balanceOf[founder] = safeAdd(balanceOf[founder], additionalTokens);
         uint256 additionalTokens = safeSub(totalSupply,totalSaleAmount);
-        balanceOf[founder] = safeAdd(balanceOf[founder], additionalTokens);
-        Transfer(0, founder,additionalTokens);
+        uint256 finalAdditionsTokens = safeSub(additionalTokens,presaleAmount);
+        balanceOf[founder] = safeAdd(balanceOf[founder], finalAdditionsTokens);
+        Transfer(0, founder,finalAdditionsTokens);
 
         Finalized(now);
 
-        // Transfer ETH to the USDX Factory address.
+        // Transfer ETH to the founder address.
         founder.transfer(this.balance);
 
 
@@ -194,7 +201,6 @@ contract CrowdsaleController is USDXToken {
     function refund()
     public
     {
-      require(isOpen == false);
       require(block.number >= fundingEndBlock);
       require(isRefund);
       uint256 tokenAmount = balanceOf[msg.sender];

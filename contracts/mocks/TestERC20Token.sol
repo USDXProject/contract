@@ -10,8 +10,8 @@ contract TestERC20Token is ERC20Token {
     uint256 public initialSupply = 2000;// initial total amount
     uint256 public tokenDecimals = 0;
     function TestERC20Token()
-         ERC20Token(tokenName, tokenSymbol,tokenDecimals)
-         public
+    ERC20Token(tokenName, tokenSymbol,tokenDecimals)
+    public
     {
         balanceOf[msg.sender] = initialSupply;
     }
