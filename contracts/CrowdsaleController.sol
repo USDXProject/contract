@@ -37,25 +37,13 @@ contract CrowdsaleController is USDXToken {
 
     //Ensures the crowdfund is ongoing
     modifier crowdfundIsActive() {
-        require(isOpen && fundingStartBlock >= block.number && block.number <= fundingEndBlock);
+        require(fundingStartBlock >= block.number && block.number <= fundingEndBlock);
         _;
     }
     //Ensures only whiteListed address can buy tokens
     modifier onlyWhiteList(address _beneficiary) {
         require(whiteList[_beneficiary]);
         _;
-    }
-
-    //Open the crowdfunding
-    function openCrowdfund() external onlyOwner returns (bool success) {
-        require(isOpen == false);
-        isOpen = true;
-        return true;
-    }
-
-    function closeCrowdfund() external onlyOwner returns (bool success) {
-        isOpen = false;
-        return true;
     }
 
     function CrowdsaleController(
