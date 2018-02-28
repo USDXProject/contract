@@ -12,8 +12,6 @@ contract CrowdsaleController is USDXToken {
 
     string public constant version = "0.1";
 
-    bool public funding = true; // funding state
-
     bool public isRefund = false;//refund status
     // Crowdsale parameters
     uint256 public fundingStartBlock;
@@ -43,8 +41,8 @@ contract CrowdsaleController is USDXToken {
         _;
     }
     //Ensures only whiteListed address can buy tokens
-    modifier onlyWhiteList() {
-        require(whiteList[msg.sender]);
+    modifier onlyWhiteList(address _beneficiary) {
+        require(whiteList[_beneficiary]);
         _;
     }
 
@@ -96,12 +94,10 @@ contract CrowdsaleController is USDXToken {
     public
     payable
     crowdfundIsActive
-    onlyWhiteList
+    onlyWhiteList(_beneficiary)
     validAmount(msg.value)
     {
         require(_beneficiary != address(0));
-        //require(block.number >= fundingStartBlock);
-        //require(block.number <= fundingEndBlock);
 
         uint256 tokenAmount = getTokenExchangeAmount(msg.value, initialExchangeRate, nativeDecimals,decimals);
 
@@ -129,10 +125,10 @@ contract CrowdsaleController is USDXToken {
     onlyOwner
     public
     {
-        assert(funding);
-        assert(block.number >= fundingEndBlock);
 
-        funding = false;
+        require(isOpen == false);
+        require(block.number >= fundingEndBlock);
+
         // Create additional USDX for the USDX Factory and developers as
         // the 18% of total number of tokens.
         // All additional tokens are transfered to the account controller by
@@ -198,9 +194,9 @@ contract CrowdsaleController is USDXToken {
     function refund()
     public
     {
-      //assert(funding);
-      assert(block.number >= fundingEndBlock);
-      assert(isRefund);//
+      require(isOpen == false);
+      require(block.number >= fundingEndBlock);
+      require(isRefund);
       uint256 tokenAmount = balanceOf[msg.sender];
       assert(tokenAmount > 0);
 
