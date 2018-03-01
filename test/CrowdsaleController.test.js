@@ -49,85 +49,7 @@ contract('CrowdsaleController',function(accounts) {
 
         });
     });
-    // describe("Minting", () => {
-    //     it('allows only the owner of the contract to mint reserved tokens', async () =>{
-    //         let initialSupply = web3.toBigNumber(await token.totalSupply());
-    //         let presaleAmount = web3.toBigNumber(config.presaleAmount * Math.pow(10, decimals));
-    //         assert.equal(initialSupply.toString(),presaleAmount.toString());
-    //
-    //         let mintedTokenAmount = web3.toBigNumber(10e6 * Math.pow(10, decimals));
-    //         await token.mint(owner,mintedTokenAmount,{from:owner});
-    //
-    //         let actualMintSupply = web3.toBigNumber(await token.totalSupply());
-    //         let expectedTotalSupply = initialSupply.add(mintedTokenAmount);
-    //         assert.equal(actualMintSupply.toString(),expectedTotalSupply.toString(),
-    //         "Expected total supply does not match.");
-    //     })
-    //
-    //     it('does not allow an address other than the owner to mint reserved tokens', async () => {
-    //         let initialSupply = web3.toBigNumber(await token.totalSupply());
-    //         let presaleAmount = web3.toBigNumber(config.presaleAmount * Math.pow(10, decimals));
-    //         assert.equal(initialSupply.toString(),presaleAmount.toString());
-    //         try{
-    //             let mintedTokenAmount = web3.toBigNumber(10e6 * Math.pow(10, decimals));
-    //             await token.mint(owner,mintedTokenAmount,{from:accounts[1]});
-    //             assert.fail();
-    //         }catch(e){
-    //             assert.match(e.toString(),regexError);
-    //
-    //         }
-    //         let actualMintSupply = web3.toBigNumber(await token.totalSupply());
-    //         assert.equal(actualMintSupply.toString(),initialSupply.toString(),
-    //         "Expected total supply does not match.");
-    //
-    //     });
-    //
-    //     it('should be able to mint the reserved portion to the owner', async () => {
-    //         let totalSupply = await token.totalSupply();
-    //         let owner = await token.owner();
-    //         let maxTokenSupply = await token.tokenTotalSupply();
-    //
-    //         let balanceBefore = await token.balanceOf(owner);
-    //         let residualTokens = maxTokenSupply.sub(totalSupply);
-    //
-    //         await token.mint(owner,residualTokens);
-    //
-    //         let balanceAfter = await token.balanceOf(owner);
-    //         assert.equal(balanceBefore.add(residualTokens).valueOf(),balanceAfter.valueOf());
-    //
-    //
-    //     });
-    //
-    //     it('allows owner to mint reserved tokens after the end block has been reached', async () => {
-    //         let initialSupply = web3.toBigNumber(await token.totalSupply());
-    //         let presaleAmount = web3.toBigNumber(config.presaleAmount * Math.pow(10, decimals));
-    //         assert.equal(initialSupply.toString(), presaleAmount.toString(), "Initial supply should match presale amount.");
-    //
-    //         await blockHeightManager.mineTo(config.endBlock +1);
-    //         assert.isAbove(await requester.getBlockNumberAsync(),config.endBlock);
-    //
-    //         let mintedTokenAmount = web3.toBigNumber(10e6 * Math.pow(10,decimals));
-    //         await token.mint(owner,mintedTokenAmount,{from:owner});
-    //
-    //         let actualTotalSupply = web3.toBigNumber(await token.totalSupply());
-    //         let expectedTotalSupply = initialSupply.add(mintedTokenAmount);
-    //         assert.equal(actualTotalSupply.toString(), expectedTotalSupply.toString(), "Total supply does not match.");
-    //
-    //     });
-    //
-    //     it('allows minting if it does not exceed the total token supply', async () => {
-    //
-    //         let initialSupply = web3.toBigNumber(await token.totalSupply());
-    //         let presaleAmount = web3.toBigNumber(config.presaleAmount * Math.pow(10,decimals));
-    //         assert.equal(initialSupply.toString(),presaleAmount.toString(),"Initial supply should match presale amount");
-    //
-    //         let maxTokenSupply = await token.tokenTotalSupply();
-    //         let maxMintAmount = maxTokenSupply.sub(initialSupply);
-    //         await token.mint(owner,maxMintAmount,{from:owner});
-    //
-    //         let actualTotalSupply = web3.toBigNumber(await token.totalSupply());
-    //     });
-    // });
+
     describe('Purchasing', () => {
         it('reject buying token before startBlock', async () => {
             assert(await requester.getBlockNumberAsync() < config.startBlock,
@@ -161,6 +83,25 @@ contract('CrowdsaleController',function(accounts) {
 
             }
         });
+
+        it('reject buying token no add whitelist', async () => {
+            await blockHeightManager.mineTo(validPurchaseBlock);
+
+            let from = accounts[1];
+            let exchangeTokenWei = 1 * Math.pow(10,nativeDecimals);
+            let totalSupply = await token.totalSupply;//add whiteList
+
+
+            try{
+                let from = accounts[1];
+                let exchangeTokenWei = 1 * Math.pow(10,nativeDecimals);
+
+                await token.contribute(from, {value: exchangeTokenWei});
+                assert.fail();
+            }catch(e){
+                assert.match(e.toString(),regexError);
+            }
+        })
         it('accept buying token between start and end block', async () => {
             await blockHeightManager.mineTo(validPurchaseBlock);
 
@@ -266,12 +207,11 @@ contract('CrowdsaleController',function(accounts) {
 
         it('does not allow buying tokens once sale amount has been reached', async () => {
 
-            await blockHeightManager.mineTo(validPurchaseBlock);
-
-            // Determine max number of tokens to purchase
-            // 60e14 (total) - 30e14 (presale) = 30e14 (for purchase)
-            // let saleAmount = web3.toBigNumber(await token.saleAmount());
-            // let maxPurchaseTokens = saleAmount - presaleAmount;
+            // await blockHeightManager.mineTo(validPurchaseBlock);
+            //
+            // //Determine max number of tokens to purchase
+            // let totalSaleAmount = web3.toBigNumber(await token.totalSaleAmount());
+            // let maxPurchaseTokens = totalSaleAmount - presaleAmount;
             //
             // // Reverse the logic for getTokenExchangeAmount()
             // let exchangeRate = await token.initialExchangeRate();
