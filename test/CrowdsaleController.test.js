@@ -17,6 +17,7 @@ contract('CrowdsaleController',function(accounts) {
     let token;
     let decimals;
     let nativeDecimals;
+    let investor1,investor2,investor3;
 
     before(blockHeightManager.snapshot);
     afterEach(blockHeightManager.revert);
@@ -25,6 +26,12 @@ contract('CrowdsaleController',function(accounts) {
         token = await CrowdsaleController.deployed();
         decimals = await token.decimals.call();
         nativeDecimals = await token.nativeDecimals.call();
+
+        //[investor1,investor2,investor3] = accounts = await web3.eth.getAccounts();
+        investor1 = accounts[0];
+        investor2 = accounts[1];
+        investor3 = accounts[2];
+
     });
 
     describe("Initialization", () => {
@@ -37,8 +44,8 @@ contract('CrowdsaleController',function(accounts) {
 
              assert(fundingEndBlock > fundingStartBlock, "Funding end block is before funding start block.");
 
-             assert.equal(await token.initialExchangeRate(), config.initialExchangeRate,
-             "Initial contribute rate does not match.");
+              assert.equal(await token.initialExchangeRate(), config.initialExchangeRate,
+              "Initial contribute rate does not match.");
 
         });
     });
@@ -138,8 +145,10 @@ contract('CrowdsaleController',function(accounts) {
         });
 
         it('reject buying token after endBlock', async () => {
+
             await blockHeightManager.mineTo(config.endBlock +1);
             assert.isAtLeast(await requester.getBlockNumberAsync(),config.endBlock);
+
 
             try{
                 let from = accounts[1];
@@ -157,7 +166,10 @@ contract('CrowdsaleController',function(accounts) {
 
              let from = accounts[1];
              let exchangeTokenWei = 1 * Math.pow(10,nativeDecimals);
-             let totalSupply = await token.totalSupply;
+             let totalSupply = await token.totalSupply;//add whiteList
+             const whitelist = [investor1,investor2];
+             await token.whiteListAccounts(whitelist,{from:owner});
+
              await token.contribute(from, {value: exchangeTokenWei});
 
              let actualBalance = web3.toBigNumber(await token.balanceOf(from));
@@ -195,6 +207,9 @@ contract('CrowdsaleController',function(accounts) {
             let from = accounts[1];
             let exchangeTokenWei = 1 * Math.pow(10,nativeDecimals);
 
+            const whitelist = [investor1,investor2];
+            await token.whiteListAccounts(whitelist,{from:owner});
+
             await requester.sendTransactionAsync({
                 to:token.address,
                 from:from,
@@ -214,6 +229,10 @@ contract('CrowdsaleController',function(accounts) {
             let purchaser = accounts[1];
             let beneficiary = accounts[2];
             let exchangeTokenWei = 1 * Math.pow(10,nativeDecimals);
+
+            const whitelist = [beneficiary];
+            await token.whiteListAccounts(whitelist,{from:owner});
+
             await token.contribute(beneficiary,{from:purchaser,value:exchangeTokenWei});
 
             let purchaserBalance = await token.balanceOf(purchaser);
@@ -233,6 +252,9 @@ contract('CrowdsaleController',function(accounts) {
             let purchaser = accounts[1];
             let beneficiary = accounts[1];
             let exchangeTokenWei = 1 * Math.pow(10, nativeDecimals);
+
+            const whitelist = [beneficiary];
+            await token.whiteListAccounts(whitelist,{from:owner});
             await token.contribute(beneficiary, {from: purchaser, value: exchangeTokenWei});
 
             let balance = await token.balanceOf(purchaser);
@@ -274,12 +296,16 @@ contract('CrowdsaleController',function(accounts) {
         describe('Forwarding Funds', () =>{
             it('should forward funds to the owner',async () =>{
                 let owner = await token.owner();
-                let beforeTransferBalance = web3.toBigNumber(await requester.getBalanceAsync(owner));
+
 
                 await blockHeightManager.mineTo(validPurchaseBlock);
 
                 let from = accounts[1];
-                let exchangeTokenWei = 1 * Math.pow(10,nativeDecimals);
+                let exchangeTokenWei = 1 * Math.pow(10,nativeDecimals);//1 eth
+
+                const whitelist = [from];
+                await token.whiteListAccounts(whitelist,{from:owner});
+                let beforeTransferBalance = web3.toBigNumber(await requester.getBalanceAsync(owner));
                 await token.contribute(from,{from:from,value:exchangeTokenWei});
 
                 let afterTransferBalance = web3.toBigNumber(await requester.getBalanceAsync(owner));
