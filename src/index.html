@@ -28,6 +28,7 @@
       </div>
 
       <div id="petsRow" class="row">
+
         <div class="col-sm-6 col-sm-push-3 col-md-4 col-md-push-4">
           <div class="panel panel-default">
             <div class="panel-heading">
@@ -40,6 +41,21 @@
               <input type="text" class="form-control" id="USDXTransferAddress" placeholder="Address" />
               <input type="text" class="form-control" id="USDXTransferAmount" placeholder="Amount" />
               <button class="btn btn-primary" id="transferButton" type="button">Transfer</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-sm-push-3 col-md-4 col-md-push-4">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Add Whilte</h3>
+            </div>
+            <div class="panel-body">
+              <h4>Current WhiteList</h4>
+              <strong>List</strong>: <span id="whiteList"></span> <br/><br/>
+              <h4>Add WhiteList</h4>
+              <input type="text" class="form-control" id="WhiteListArr" placeholder="Please input whitelist array" />
+              <button class="btn btn-primary" id="addWhiteListButton" type="button">Add</button>
             </div>
           </div>
         </div>

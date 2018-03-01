@@ -22,15 +22,16 @@ App = {
 
   initContract: function() {
     //$.getJSON('USDXToken.json', function(data) {
-    $.getJSON('TestERC20Token.json', function(data) {
+    $.getJSON('CrowdsaleController.json', function(data) {
       // Get the necessary contract artifact file and instantiate it with truffle-contract.
       var USDXArtifact = data;
       App.contracts.USDXToken = TruffleContract(USDXArtifact);
 
       // Set the provider for our contract.
       App.contracts.USDXToken.setProvider(App.web3Provider);
-
-      return App.getBalances();
+      App.getIsAddWhiteList();
+      App.getBalances();
+      //return
     });
 
     return App.bindEvents();
@@ -38,6 +39,7 @@ App = {
 
   bindEvents: function() {
     $(document).on('click', '#transferButton', App.handleTransfer);
+    $(document).on('click', '#addWhiteListButton', App.handleAddWhiteList);
   },
 
   handleTransfer: function(event) {
@@ -70,6 +72,34 @@ App = {
     });
   },
 
+  handleAddWhiteList: function(event) {
+    event.preventDefault();
+
+    var whiteListStr = $("#WhiteListArr").val();
+    var whiteListArr = whiteListStr.split(",");
+    console.log('whiteList array ' + whiteListArr);
+
+    var usdxTokenInstance;
+
+    web3.eth.getAccounts(function(error, accounts) {
+      if (error) {
+        console.log(error);
+      }
+
+      var account = accounts[0];
+
+      App.contracts.USDXToken.deployed().then(function(instance) {
+        usdxTokenInstance = instance;
+        return usdxTokenInstance.whiteListAccounts(whiteListArr,{from:account});
+      }).then(function(result) {
+        alert('add Whitelist Successful!');
+        return App.getIsAddWhiteList();
+      }).catch(function(err) {
+        console.log(err.message);
+      });
+    });
+  },
+
   getBalances: function(adopters, account) {
     console.log('Getting balances...');
 
@@ -94,7 +124,33 @@ App = {
         console.log("result = " + result);
         console.log("balance = " + balance);
 
-        $('#USDXBalance').text(balance);
+        $('#USDXBalance').text(result);
+      }).catch(function(err) {
+        console.log(err.message);
+      });
+    });
+  },
+  getIsAddWhiteList: function(adopters, account) {
+    console.log('Getting whiteList...');
+
+    var usdxTokenInstance;
+
+    web3.eth.getAccounts(function(error, accounts) {
+      if (error) {
+        console.log(error);
+      }
+
+      var whiteListStr = $("#WhiteListArr").val();
+      var whiteListArr = whiteListStr.split(",");
+      console.log("whiteListArr[0] = " + whiteListArr[0]);
+
+      App.contracts.USDXToken.deployed().then(function(instance) {
+        usdxTokenInstance = instance;
+        console.log(usdxTokenInstance);
+
+        return usdxTokenInstance.whiteList(whiteListArr[0]);
+      }).then(function(result) {
+        $('#whiteList').text(result);
       }).catch(function(err) {
         console.log(err.message);
       });

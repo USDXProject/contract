@@ -4,7 +4,7 @@ import './USDXToken.sol';
 contract CrowdsaleController is USDXToken {
     uint256 public constant nativeDecimals = 18;//ether or bitcoin decimal
 
-    mapping (address => bool) whiteList;//Buyers whiteListing mapping
+    mapping (address => bool) public whiteList;//Buyers whiteListing mapping
 
     bool public funding = true;// funding state
     uint256 public totalSaleAmount = 3 * (10**8) * (10**  decimals); // 0.3 billion USDX ever created test 16000
