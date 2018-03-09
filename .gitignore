@@ -11,6 +11,11 @@ contract03/usdx/.idea/
 contract03/usdx/build/
 contract03/usdx/node_modules/
 node_modules/
+.idea/
+/build/
+/node_modules/
+node_modules/
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

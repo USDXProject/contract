@@ -1,0 +1,28 @@
+{
+  "name": "usdx-contracts",
+  "version": "1.0.0",
+  "description": "USDX Token crowdsale contracts",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "dev": "lite-server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "Wenqi Deng<wenqi@usdx.money>",
+  "devDependencies": {
+    "bluebird": "^3.5.1",
+    "chai": "^4.1.2",
+    "ethereumjs-testrpc": "^6.0.3",
+    "truffle-hdwallet-provider": "0.0.3"
+  },
+  "dependencies": {
+    "chai-as-promised": "^7.1.1",
+    "chai-bignumber": "^2.0.2",
+    "lite-server": "^2.3.0"
+  }
+}
